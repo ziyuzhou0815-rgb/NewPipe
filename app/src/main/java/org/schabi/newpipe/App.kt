@@ -136,7 +136,15 @@ open class App :
         }.build()
 
     protected open fun getDownloader(): Downloader {
-        val downloader = DownloaderImpl.init(null)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val disableIpv6 = prefs.getBoolean(getString(R.string.disable_ipv6_key), false)
+
+        val builder = okhttp3.OkHttpClient.Builder()
+        if (disableIpv6) {
+            builder.dns(Ipv4OnlyDns())
+        }
+
+        val downloader = DownloaderImpl.init(builder)
         setCookiesToDownloader(downloader)
         return downloader
     }
